@@ -8,7 +8,7 @@ name = input("Enter name: ")
 print(f"{name=}")
 
 
-def is_palindrome   (text: str) -> bool:
+def is_palindrome(text: str) -> bool:
     """Проверка текста на палиндром
 
     :param text: Текст для проверки
