@@ -221,3 +221,14 @@
 # print(sum(numbers, start=17))
 # print(reversed(numbers))
 # print(sorted(deepcopy(numbers)))
+
+
+# text = "Hello"
+#
+# letters = []
+# letters.append(text)
+
+
+numbers = [4, 3, 5, 4, 2, 3, 4, 7]
+numbers[3:5] = "Hello"
+print(numbers)
