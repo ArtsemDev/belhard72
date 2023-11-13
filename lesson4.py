@@ -235,3 +235,15 @@
 # print((n & (n - 1) == 0) and n != 0)
 # print(bin(16))
 # print(bin(15))
+
+
+# n = int(input())
+# numbers = [2 ** i for i in range(1, n + 1)]
+
+
+# text = input()
+# letters_count = {i: text.count(i) for i in text if i.isalpha()}
+# print(letters_count)
+
+# n = int(input())
+# data = {i: {"name": input(), "email": input()} for i in range(1, n + 1)}
