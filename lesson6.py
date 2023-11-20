@@ -144,10 +144,10 @@
 # #
 # # # from time import sleep
 # # #
-# # # with open("input.txt", "r") as file:
-# # #     for line in file:
-# # #         print(line)
-# # #         sleep(2)
+# with open("input.txt", "r") as file:
+#     txt = file.read()
+#     while True:
+#         pass
 # #
 # #
 #
@@ -307,15 +307,19 @@
 #  факториал переданного числа
 
 
-def factorial(number):
-    if number == 1:
-        return number
-    return factorial(number - 1) * number
+# def factorial(number):
+#     if number == 1:
+#         return number
+#     return factorial(number - 1) * number
+#
+#
+# def is_palindrome(text: str) -> bool:
+#     return text.lower() == text.lower()[::-1]
+#
+#
+# def find_oldest_user(users: list[dict[str, str | int]]):
+#     print(users)
 
 
-def is_palindrome(text: str) -> bool:
-    return text.lower() == text.lower()[::-1]
-
-
-def find_oldest_user(users: list[dict[str, str | int]]):
-    print(users)
+def bar():
+    print("bar")
