@@ -103,11 +103,29 @@
 #         cur.execute("select avg(id) as avg_id from categories;")
 #         print(cur.fetchall())
 from datetime import datetime, UTC
+from typing import Type
 
-from sqlalchemy import Column, INT, VARCHAR, BOOLEAN, ForeignKey, CheckConstraint, TEXT, TIMESTAMP, create_engine
+from sqlalchemy import (
+    Column,
+    INT,
+    VARCHAR,
+    BOOLEAN,
+    ForeignKey,
+    CheckConstraint,
+    TEXT,
+    TIMESTAMP,
+    create_engine,
+    update,
+    delete,
+    select,
+    or_,
+    and_,
+    any_,
+    all_
+)
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import DeclarativeBase, relationship, sessionmaker
-
+from sqlalchemy.orm import DeclarativeBase, relationship, sessionmaker, synonym, Session, selectinload
+from sqlalchemy.sql.functions import count, func
 
 # sqlalchemy < 2.0
 # Base = declarative_base()
@@ -119,7 +137,11 @@ session_maker = sessionmaker(bind=engine)
 
 # sqlalchemy >= 2.0
 class Base(DeclarativeBase):
-    pass
+
+    def update_from_attributes(self, obj: "BaseModel"):
+        for k, v in obj.model_dump(exclude_none=True, exclude_defaults=True, exclude_unset=True).items():
+            if hasattr(self, k):
+                setattr(self, k, v)
 
 
 class User(Base):
@@ -135,6 +157,13 @@ class User(Base):
     is_active = Column(BOOLEAN, default=False)
 
     posts = relationship(argument="Post", back_populates="user")
+    pk = synonym(name="id")
+
+    def __str__(self):
+        return self.email
+
+    def __repr__(self):
+        return self.email
 
 
 class Post(Base):
@@ -155,23 +184,228 @@ class Post(Base):
 
 
 # Base.metadata.create_all(bind=engine)
-with session_maker() as session:
-    user1 = User(
-        email="vasy@gmail.com",
-        username="vasya"
-    )
-    user2 = User(
-        email="petya@gmail.com",
-        username="petya"
-    )
-    session.add_all((user1, user2))
-    try:
-        session.commit()
-    except IntegrityError:
-        pass
-    # else:
-        # session.refresh(user1)
-        # session.refresh(user2)
-    print(user1.id)
-    print(user2.id)
+# with session_maker() as session:
+#     user1 = User(
+#         email="vasy@gmail.com",
+#         username="vasya"
+#     )
+#     user2 = User(
+#         email="petya@gmail.com",
+#         username="petya"
+#     )
+#     session.add_all((user1, user2))
+#     try:
+#         session.commit()
+#     except IntegrityError:
+#         pass
+#     # else:
+#         # session.refresh(user1)
+#         # session.refresh(user2)
+#     print(user1.id)
+#     print(user2.id)
 
+
+# with session_maker() as session:  # type: Session
+#     user = session.get(User, 1)
+#     post = Post(
+#         title="Post 1",
+#         body="description",
+#         user=user
+#     )
+#     session.add(post)
+#     session.commit()
+
+
+# with session_maker() as session:  # type: Session
+#     obj = session.query(Post.id + 5)
+#     print(obj)
+    # obj = session.get(entity=User, ident=3)
+    # objs = session.query(User).filter(User.id.in_((1, 2, 3))).order_by(User.email.desc()).all()
+    # print(objs)
+    # objs = session.scalars(
+    #     select(User)
+    #     .filter(User.id.in_((1, 2, 3)))
+    #     .order_by()
+    # ).all()
+    # print(objs)
+    # c = session.scalar(
+    #     select(count(User.id))
+    # )
+    # print(c)
+    # session.scalars(
+    #     select(User)
+    #     .filter(or_(User.id >= 1, User.id == 2))
+    # )
+
+    # objs = session.execute(
+    #     select(User, Post)
+    #     .join(target=Post, onclause=User.id == Post.user_id, isouter=True)
+    # ).all()
+    # print(objs)
+    # obj = session.get(User, 1)
+    # obj.email = "vasya@yahoo.com"
+    # post = Post(
+    #     title="Post 2",
+    #     body="Description"
+    # )
+    # obj.posts.append(post)
+    # session.commit()
+
+    # obj = session.get(User, 1, options=[selectinload(User.posts)])
+    # print(obj.posts)
+    # users = session.query(User).options(selectinload(User.posts)).all()
+    # print(users)
+
+    # session.execute(
+    #     update(User)
+    #     .filter(User.id.in_((1, 2,)))
+    #     .values(is_active=True)
+    # )
+    # session.commit()
+
+    # obj = session.get(User, 2)
+    # session.delete(obj)
+    # session.commit()
+
+    # session.execute(
+    #     delete(Post)
+        # .filter(Post.user.email == "vasya@yahoo.com")
+    # )
+    # session.commit()
+
+    # obj = session.scalar(
+    #     select(Post)
+    #     .filter(or_(func.upper(Post.title).contains("POST"), func.upper(Post.body).contains("POST")))
+    # )
+    # print(obj)
+
+from pydantic import BaseModel
+
+
+class UserDetail(BaseModel):
+    id: int = None
+    email: str
+    username: str
+    is_active: bool = False
+    # posts: list["PostDetail"] = []
+
+
+class PostDetail(BaseModel):
+    id: int
+    title: str
+    body: str
+    date_created: datetime
+    is_published: bool
+    user_id: int
+
+
+# with session_maker() as session:
+#     user = UserDetail(
+#         id=1,
+#         email="vasek@gmail.com",
+#         username="vasek"
+#     )
+#     obj = session.get(User, 1)
+#     obj.update_from_attributes(obj=user)
+#     session.commit()
+    # obj = session.get(User, 1, options=[selectinload(User.posts)])
+    # user = UserDetail.model_validate(obj=obj, from_attributes=True)
+    # print(user)
+    # user = UserDetail(
+    #     email="petya@gmail.com",
+    #     username="petya"
+    # )
+    # obj = User(**user.model_dump())
+    # session.add(obj)
+    # session.commit()
+
+
+from abc import ABC, abstractmethod
+
+
+class AbstractRepository(ABC):
+
+    schema: Type[BaseModel]
+
+    @abstractmethod
+    def get(self, pk) -> BaseModel | None:
+        pass
+
+    @abstractmethod
+    def create(self, obj: BaseModel) -> BaseModel:
+        pass
+
+    @abstractmethod
+    def update(self, obj: BaseModel) -> BaseModel:
+        pass
+
+    @abstractmethod
+    def delete(self, pk) -> None:
+        pass
+
+
+class SQLAlchemyRepository(AbstractRepository):
+    model: Type[Base]
+
+    def __init__(self, session_maker) -> None:  # noqa
+        self.session_maker = session_maker
+
+    def get(self, pk) -> BaseModel:
+        with self.session_maker() as session:
+            obj = session.get(self.model, pk)
+            if obj is not None:
+                return self.schema.model_validate(obj=obj, from_attributes=True)
+
+    def create(self, obj: BaseModel) -> BaseModel:
+        with self.session_maker() as session:
+            orm_obj = self.model(**obj.model_dump())
+            session.add(orm_obj)
+            session.commit()
+            return self.schema.model_validate(obj=orm_obj, from_attributes=True)
+
+    def update(self, obj: BaseModel) -> BaseModel:
+        with self.session_maker() as session:
+            session.execute(
+                update(self.model)
+                .values(**obj.model_dump(exclude={"id"}))
+                .filter(self.model.id == obj.id)
+            )
+            session.commit()
+            return obj
+
+    def delete(self, pk) -> None:
+        with self.session_maker() as session:
+            session.execute(
+                delete(self.model)
+                .filter(self.model.id == pk)
+            )
+            session.commit()
+
+
+class SQLRepository(AbstractRepository):
+
+    def get(self, pk) -> BaseModel | None:
+        pass
+
+    def create(self, obj: BaseModel) -> BaseModel:
+        pass
+
+    def update(self, obj: BaseModel) -> BaseModel:
+        pass
+
+    def delete(self, pk) -> None:
+        pass
+
+
+class UserRepository(SQLAlchemyRepository):
+    model = User
+    schema = UserDetail
+
+
+class PostRepository(SQLAlchemyRepository):
+    model = Post
+    schema = PostDetail
+
+
+# user_repository = UserRepository(session_maker=session_maker)
+# print(user_repository.get(pk=1))
