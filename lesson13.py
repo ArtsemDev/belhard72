@@ -1,125 +1,62 @@
-# from threading import *
-# from queue import PriorityQueue
-# from time import sleep
+# from asyncio import run
+#
+# from sqlalchemy import Column, INT, VARCHAR
+# from sqlalchemy.orm import DeclarativeBase
+# from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 #
 #
-# # print_lock = Lock()
-# #
-# #
-# # def foo():
-# #     for _ in range(10):
-# #         print_lock.acquire()
-# #         print(current_thread().name)
-# #         print_lock.release()
-# #         sleep(1)
-# #
-# #
-# # flag = 5
-# # flag_lock = Lock()
-# #
-# #
-# # def bar():
-# #     global flag
-# #     with flag_lock:
-# #         if flag == 5:
-# #             sleep(2)
-# #             print(flag * 2)
-# #
-# #
-# # def baz():
-# #     global flag
-# #     with flag_lock:
-# #         sleep(1)
-# #         flag = 4
-# #
-# #
-# # # if __name__ == '__main__':
-# # #     threads = [Thread(target=foo) for _ in range(10)]
-# # #     for thread in threads:
-# # #         thread.start()
-# #
-# # if __name__ == '__main__':
-# #     thread1 = Thread(target=bar)
-# #     thread2 = Thread(target=baz)
-# #     thread1.start()
-# #     thread2.start()
-#
-# semaphore = Semaphore(value=5)
-# barrier = Barrier(parties=3)
+# class Base(DeclarativeBase):
+#     pass
 #
 #
-# print_lock = Lock()
+# class User(Base):
+#     __tablename__ = "users"
+#
+#     id = Column(INT, primary_key=True)
+#     username = Column(VARCHAR(32), nullable=False)
 #
 #
-# def foo():
-#     barrier.wait(timeout=3)
-#     for _ in range(10):
-#         with print_lock:
-#             print(current_thread().name)
-#         sleep(1)
+# engine = create_async_engine(url="sqlite+aiosqlite:///db.sqlite3")
+# async_session_maker = async_sessionmaker(bind=engine)
 #
 #
-# # if __name__ == '__main__':
-# #     threads = [Thread(target=foo) for _ in range(10)]
-# #     for thread in threads:
-# #         thread.start()
+# async def main():
+#     async with async_session_maker() as session:  # type: AsyncSession
+#         user = User(username="user 1")
+#         session.add(user)
+#         await session.commit()
+#         await session.refresh(user)
 #
 #
-# # event1 = Event()
-# # l = local()
-# #
-# #
-# # def func():
-# #     print(l.a)
-# #     l.a = 4
-# #
-# #
-# # def bar():
-# #     l.a = 5
-# #     func()
-# #     baz()
-# #
-# #
-# # def baz():
-# #     print(l.a)
-# #
-# #
-# # if __name__ == '__main__':
-# #     thread1 = Thread(target=bar)
-# #     # thread2 = Thread(target=baz)
-# #     thread1.start()
-# #     # thread2.start()
-# from random import randint
-# q = PriorityQueue(maxsize=10)
+# run(main())
+
+# GET
+# HEAD
+# POST
+# PUT
+# PATCH
+# DELETE
+# from httpx import Client, AsyncClient, codes
+# from http import HTTPMethod, HTTPStatus
+#
+# # sw_ref[0]=new&sw_ref[operation]=union&mobile_type[0]=smartphone&mobile_type[operation]=union
 #
 #
-# def bar():
-#     for _ in range(10):
-#         q.put((randint(1, 10), randint(1, 10)))
-#
-#
-# def baz():
-#     while not q.full():
-#         pass
-#     for _ in range(10):
-#         print(q.get())
+# async def main():
+#     async with AsyncClient(base_url="https://catalog.onliner.by") as client:
+#         response = await client.get(
+#             url="/mobile",
+#             params={
+#                 "sw_ref[0]": "new",
+#                 "sw_ref[operation]": "union",
+#                 "mobile_type[0]": "smartphone",
+#                 "mobile_type[operation]": "union"
+#             }
+#         )
+#         print(response.status_code)
+#         print(response.headers)
 #
 #
 # if __name__ == '__main__':
-#     thread1 = Thread(target=bar)
-#     thread2 = Thread(target=baz)
-#     thread1.start()
-#     thread2.start()
-
-
-from multiprocessing import *
-
-
-def foo():
-    for _ in range(10):
-        print(current_process().name)
-
-
-if __name__ == '__main__':
-    process = Process(target=foo)
-    process.start()
+#     from asyncio import run
+#     run(main())
