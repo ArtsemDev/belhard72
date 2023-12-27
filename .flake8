@@ -1,0 +1,4 @@
+[flake8]
+exclude=tests,venv,.idea,alembic,.github
+max-line-length=120
+ignore=F401,W292

@@ -1,5 +1,6 @@
 # from ujson import *
 from decimal import Decimal
+
 # text = """
 # {
 #   "name": "Alex",
@@ -55,11 +56,24 @@ from decimal import Decimal
 from re import fullmatch
 from typing import *
 
-from pydantic import AfterValidator, BaseModel, EmailStr, model_validator, Field, FileUrl, validate_call
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    EmailStr,
+    model_validator,
+    Field,
+    FileUrl,
+    validate_call,
+)
 
 
 def _validate_password(v: str) -> str:
-    if fullmatch(r"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,64}$", v) is None:
+    if (
+        fullmatch(
+            r"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,64}$", v
+        )
+        is None
+    ):
         raise ValueError
     return v
 

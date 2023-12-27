@@ -120,6 +120,6 @@ def foo():
         print(current_process().name)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     process = Process(target=foo)
     process.start()

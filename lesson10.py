@@ -1,10 +1,5 @@
 class DictReader:
-
-    def __init__(
-            self,
-            file_path: str,
-            separator: str = ","
-    ) -> None:
+    def __init__(self, file_path: str, separator: str = ",") -> None:
         self.file_path = file_path
         self.separator = separator
         self.file = open(file=self.file_path, mode="r")
@@ -24,5 +19,6 @@ class DictReader:
 def foo():
     print("Foo")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     print("action")

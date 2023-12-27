@@ -117,15 +117,8 @@ from sqlalchemy import (
     create_engine,
     update,
     delete,
-    select,
-    or_,
-    and_,
-    any_,
-    all_
 )
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import DeclarativeBase, relationship, sessionmaker, synonym, Session, selectinload
-from sqlalchemy.sql.functions import count, func
+from sqlalchemy.orm import DeclarativeBase, relationship, sessionmaker, synonym
 
 # sqlalchemy < 2.0
 # Base = declarative_base()
@@ -137,9 +130,10 @@ session_maker = sessionmaker(bind=engine)
 
 # sqlalchemy >= 2.0
 class Base(DeclarativeBase):
-
     def update_from_attributes(self, obj: "BaseModel"):
-        for k, v in obj.model_dump(exclude_none=True, exclude_defaults=True, exclude_unset=True).items():
+        for k, v in obj.model_dump(
+            exclude_none=True, exclude_defaults=True, exclude_unset=True
+        ).items():
             if hasattr(self, k):
                 setattr(self, k, v)
 
@@ -148,7 +142,7 @@ class User(Base):
     __tablename__ = "users"
     __table_args__ = (
         CheckConstraint("char_length(username) >= 2 and username not like '% %'"),
-        CheckConstraint("email not like '% %'")
+        CheckConstraint("email not like '% %'"),
     )
 
     id = Column(INT, primary_key=True)
@@ -172,12 +166,14 @@ class Post(Base):
     id = Column(INT, primary_key=True)
     title = Column(VARCHAR(128), nullable=False)
     body = Column(TEXT, nullable=False)
-    date_created = Column(TIMESTAMP(timezone=True), default=lambda: datetime.now(tz=UTC), nullable=False)
+    date_created = Column(
+        TIMESTAMP(timezone=True), default=lambda: datetime.now(tz=UTC), nullable=False
+    )
     is_published = Column(BOOLEAN, server_default="false")
     user_id = Column(
         INT,
         ForeignKey(column="users.id", onupdate="CASCADE", ondelete="RESTRICT"),
-        nullable=False
+        nullable=False,
     )
 
     user = relationship(argument="User", back_populates="posts")
@@ -219,65 +215,65 @@ class Post(Base):
 # with session_maker() as session:  # type: Session
 #     obj = session.query(Post.id + 5)
 #     print(obj)
-    # obj = session.get(entity=User, ident=3)
-    # objs = session.query(User).filter(User.id.in_((1, 2, 3))).order_by(User.email.desc()).all()
-    # print(objs)
-    # objs = session.scalars(
-    #     select(User)
-    #     .filter(User.id.in_((1, 2, 3)))
-    #     .order_by()
-    # ).all()
-    # print(objs)
-    # c = session.scalar(
-    #     select(count(User.id))
-    # )
-    # print(c)
-    # session.scalars(
-    #     select(User)
-    #     .filter(or_(User.id >= 1, User.id == 2))
-    # )
+# obj = session.get(entity=User, ident=3)
+# objs = session.query(User).filter(User.id.in_((1, 2, 3))).order_by(User.email.desc()).all()
+# print(objs)
+# objs = session.scalars(
+#     select(User)
+#     .filter(User.id.in_((1, 2, 3)))
+#     .order_by()
+# ).all()
+# print(objs)
+# c = session.scalar(
+#     select(count(User.id))
+# )
+# print(c)
+# session.scalars(
+#     select(User)
+#     .filter(or_(User.id >= 1, User.id == 2))
+# )
 
-    # objs = session.execute(
-    #     select(User, Post)
-    #     .join(target=Post, onclause=User.id == Post.user_id, isouter=True)
-    # ).all()
-    # print(objs)
-    # obj = session.get(User, 1)
-    # obj.email = "vasya@yahoo.com"
-    # post = Post(
-    #     title="Post 2",
-    #     body="Description"
-    # )
-    # obj.posts.append(post)
-    # session.commit()
+# objs = session.execute(
+#     select(User, Post)
+#     .join(target=Post, onclause=User.id == Post.user_id, isouter=True)
+# ).all()
+# print(objs)
+# obj = session.get(User, 1)
+# obj.email = "vasya@yahoo.com"
+# post = Post(
+#     title="Post 2",
+#     body="Description"
+# )
+# obj.posts.append(post)
+# session.commit()
 
-    # obj = session.get(User, 1, options=[selectinload(User.posts)])
-    # print(obj.posts)
-    # users = session.query(User).options(selectinload(User.posts)).all()
-    # print(users)
+# obj = session.get(User, 1, options=[selectinload(User.posts)])
+# print(obj.posts)
+# users = session.query(User).options(selectinload(User.posts)).all()
+# print(users)
 
-    # session.execute(
-    #     update(User)
-    #     .filter(User.id.in_((1, 2,)))
-    #     .values(is_active=True)
-    # )
-    # session.commit()
+# session.execute(
+#     update(User)
+#     .filter(User.id.in_((1, 2,)))
+#     .values(is_active=True)
+# )
+# session.commit()
 
-    # obj = session.get(User, 2)
-    # session.delete(obj)
-    # session.commit()
+# obj = session.get(User, 2)
+# session.delete(obj)
+# session.commit()
 
-    # session.execute(
-    #     delete(Post)
-        # .filter(Post.user.email == "vasya@yahoo.com")
-    # )
-    # session.commit()
+# session.execute(
+#     delete(Post)
+# .filter(Post.user.email == "vasya@yahoo.com")
+# )
+# session.commit()
 
-    # obj = session.scalar(
-    #     select(Post)
-    #     .filter(or_(func.upper(Post.title).contains("POST"), func.upper(Post.body).contains("POST")))
-    # )
-    # print(obj)
+# obj = session.scalar(
+#     select(Post)
+#     .filter(or_(func.upper(Post.title).contains("POST"), func.upper(Post.body).contains("POST")))
+# )
+# print(obj)
 
 from pydantic import BaseModel
 
@@ -308,23 +304,22 @@ class PostDetail(BaseModel):
 #     obj = session.get(User, 1)
 #     obj.update_from_attributes(obj=user)
 #     session.commit()
-    # obj = session.get(User, 1, options=[selectinload(User.posts)])
-    # user = UserDetail.model_validate(obj=obj, from_attributes=True)
-    # print(user)
-    # user = UserDetail(
-    #     email="petya@gmail.com",
-    #     username="petya"
-    # )
-    # obj = User(**user.model_dump())
-    # session.add(obj)
-    # session.commit()
+# obj = session.get(User, 1, options=[selectinload(User.posts)])
+# user = UserDetail.model_validate(obj=obj, from_attributes=True)
+# print(user)
+# user = UserDetail(
+#     email="petya@gmail.com",
+#     username="petya"
+# )
+# obj = User(**user.model_dump())
+# session.add(obj)
+# session.commit()
 
 
 from abc import ABC, abstractmethod
 
 
 class AbstractRepository(ABC):
-
     schema: Type[BaseModel]
 
     @abstractmethod
@@ -375,15 +370,11 @@ class SQLAlchemyRepository(AbstractRepository):
 
     def delete(self, pk) -> None:
         with self.session_maker() as session:
-            session.execute(
-                delete(self.model)
-                .filter(self.model.id == pk)
-            )
+            session.execute(delete(self.model).filter(self.model.id == pk))
             session.commit()
 
 
 class SQLRepository(AbstractRepository):
-
     def get(self, pk) -> BaseModel | None:
         pass
 
